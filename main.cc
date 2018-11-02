@@ -40,6 +40,7 @@ using namespace std;
 int state = 2;
 int width = 0;
 int height = 0;
+int bar_count = 0;
 int game_time = 0;
 int barInterval = 100;
 double threshold_low = 0.15;
@@ -67,7 +68,7 @@ double compareArea(Mat fa, Mat fb,
 
 void detect(){
 
-#define RATE 200
+#define RATE 150
 
     fgMaskMog.copyTo(fgMaskMogPre);
     pMOG2->apply(frame, fgMaskMog);
@@ -108,6 +109,7 @@ void detect(){
         if(acc >= CendX){
             if(state == 2){
                 game_time = 0;
+                bar_count = 0;
                 for(auto i = barQueue.begin();
                         i != barQueue.end(); i++)
                     delete (*i);
@@ -179,7 +181,8 @@ int main(){
     ball = new Ball(width / 2, height / 5 * 4);
     srand(time(NULL));
 
-    while(char(waitKey(1)) != 'q' && cap.isOpened()){
+    char key;
+    while((key = char(waitKey(1))) != 'q' && cap.isOpened()){
         cap >> frame;
         if(frame.empty()){
             cout << "Video over" << endl;
@@ -188,6 +191,22 @@ int main(){
 
         flip(frame, frame, 1);
         detect();
+
+
+        if(key == 'h')
+            ball->move(frame, -10);
+        else if(key == 'l')
+            ball->move(frame, 10);
+        else if(key == ' ' && state == 2){
+            game_time = 0;
+            bar_count = 0;
+            for(auto i = barQueue.begin();
+                    i != barQueue.end(); i++)
+                delete (*i);
+            barQueue.clear();
+            state -= 1;
+        }
+
         drawUI();
 
         if(state & 1){
@@ -204,10 +223,12 @@ int main(){
                 if(barQueue.front()->outOfBound(frame)){
                     delete barQueue.front();
                     barQueue.pop_front();
+                    bar_count += 1;
                 }
             }
-            if(game_time % barInterval == 0){
-                Bar *bar = new Bar(frame, game_time / 250 + 6);
+            if(barQueue.empty() ||
+                    barQueue.back()->y > height * 4 / 5 * max(0.3, 1 - double(bar_count) / 40)){
+                Bar *bar = new Bar(frame, bar_count);
                 barQueue.push_back(bar);
             }
             game_time += 1;
@@ -220,11 +241,11 @@ int main(){
             }
         }
         putText(frame, to_string(game_time / 20),
-            Point(width / 2, height / 2),
-            0, 1, Scalar(0,255,255), 3);
+                Point(width / 2, height / 2),
+                0, 1, Scalar(0,255,255), 3);
 
         imshow("Video", frame);
-        
+
         //imshow("Mask",  fgMaskMog);
     }
     return 0;

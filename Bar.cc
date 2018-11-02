@@ -3,11 +3,11 @@
 
 #define THICK 10
 
-Bar::Bar(Mat &map, int _speed){
+Bar::Bar(Mat &map, int bar_count){
     y = 10;
-    openw = 25 + rand() % 36;
+    openw = 25 + rand() % 36 + max(0, 30 - bar_count) * 2;
     llong = rand() % (map.cols - 60);
-    speed = _speed;
+    speed = 2 * bar_count / 10 + 3;
 }
 
 void Bar::move(){

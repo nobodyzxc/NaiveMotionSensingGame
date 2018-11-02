@@ -12,10 +12,10 @@ class Bar{
         void display(Mat &map);
         bool detect(int x, int y, int r);
         bool outOfBound(Mat &frame);
-    private:
+        int speed;
         int y;
+    private:
         int openw;
         int llong;
-        int speed;
 };
 #endif
