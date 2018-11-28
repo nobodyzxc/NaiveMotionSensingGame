@@ -245,7 +245,6 @@ int main(){
                 0, 1, Scalar(0,255,255), 3);
 
         imshow("Video", frame);
-
         //imshow("Mask",  fgMaskMog);
     }
     return 0;
